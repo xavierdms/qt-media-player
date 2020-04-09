@@ -1,16 +1,22 @@
-# qt-media-player
-Qt Python media player
+# Qt Media Player
+Media player made with [Qt for Python](https://doc.qt.io/qtforpython)
+```
+pip install PySide2
+```
 
 ## Features:
 - Play/Pause/Stop
-- Open file
+- Load file(s) into playlist
 - Quit app
 - Volume slider
 - Media file title display
 - Progress bar with track length
 - Scrubbing on progress bar to jump in track
+- Fast forward/backward (adds/subtracts 10 seconds from current track position)
+- Previous/Next for skipping tracks
 
-## Planned:
-- Play/Pause toggle
-- Fast forward/backward
-- Playlist with ability to skip songs
+## Planned features:
+- Shuffle
+- Repeat
+
+![alt text](https://github.com/xavierdms/qt-media-player/blob/master/walkthrough.gif "LICEcap GIF Walkthrough")
