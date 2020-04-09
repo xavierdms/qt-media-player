@@ -4,7 +4,7 @@ import time
 from PySide2.QtUiTools import QUiLoader #allows us to import .ui files
 from PySide2.QtWidgets import QApplication, QLineEdit, QPushButton, QFileDialog, QAction, QLabel, QSlider
 from PySide2.QtCore import QFile, QObject, QUrl, Qt
-from PySide2.QtMultimedia import QMediaPlayer
+from PySide2.QtMultimedia import QMediaPlayer, QMediaPlaylist
 
 class MainWindow(QObject):
 
@@ -14,6 +14,7 @@ class MainWindow(QObject):
         #reference to our music player
         self.music_player = QMediaPlayer()
 
+        self.music_playlist = QMediaPlaylist()
         self.music_player.setVolume(80)
 
         #call parent QObject constructor
@@ -38,7 +39,6 @@ class MainWindow(QObject):
         quit_action = self.window.findChild(QAction, 'action_quit')
         quit_action.triggered.connect(self.quit_action_triggered)
 
-
         open_button = self.window.findChild(QPushButton, 'open_button')
         open_button.clicked.connect(self.open_action_triggered)
 
@@ -62,16 +62,35 @@ class MainWindow(QObject):
         volume_slider.setValue(self.music_player.volume())
         volume_slider.sliderMoved.connect(self.adjust_volume)
 
+        next_button = self.window.findChild(QPushButton, 'next_button')
+        next_button.clicked.connect(self.next_button_clicked)
+
+        previous_button = self.window.findChild(QPushButton, 'previous_button')
+        previous_button.clicked.connect(self.previous_button_clicked)
+
+        fforward_button = self.window.findChild(QPushButton, 'fforward_button')
+        fforward_button.clicked.connect(self.fforward_button_clicked)
+
+        fbackward_button = self.window.findChild(QPushButton, 'fbackward_button')
+        fbackward_button.clicked.connect(self.fbackward_button_clicked)
+
+        self.music_playlist.currentMediaChanged.connect(self.change_title)
 
         #show window to user
         self.window.show()
 
     def open_action_triggered(self):
-        file_name = QFileDialog.getOpenFileName(self.window)
-        self.music_player.setMedia(QUrl.fromLocalFile(file_name[0]))
+        files = QFileDialog.getOpenFileNames(self.window, "Add songs to playlist")
+        for i in range(len(files[0])):
+            self.music_playlist.addMedia(QUrl.fromLocalFile(str(files[0][i])))
+        self.music_playlist.setCurrentIndex(0)
+        self.music_player.setPlaylist(self.music_playlist)
+        
+    def change_title(self):
         title_label = self.window.findChild(QLabel, 'media_title')
-        show_title = os.path.basename(str(file_name[0]))
-        title_label.setText(show_title)
+        show_title_path = self.music_playlist.currentMedia().canonicalUrl().fileName()
+        show_title = os.path.splitext(show_title_path)
+        title_label.setText(show_title[0])
         
     def quit_action_triggered(self):
         self.window.close()
@@ -84,6 +103,18 @@ class MainWindow(QObject):
 
     def stop_button_clicked(self):
         self.music_player.stop()
+
+    def next_button_clicked(self):
+        self.music_playlist.next()
+
+    def previous_button_clicked(self):
+        self.music_playlist.previous()
+
+    def fforward_button_clicked(self):
+        self.music_player.setPosition(self.music_player.position()+10000)
+
+    def fbackward_button_clicked(self):
+        self.music_player.setPosition(self.music_player.position()-10000)
 
     def update_progress(self):
         progress_slider = self.window.findChild(QSlider, 'progress_slider')
